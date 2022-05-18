@@ -1,40 +1,19 @@
 const db = require('../services/knex.js');
 
+const {queryParsedLocations} = require('../services/utils.js');
+
+
 const TEST_TRANSFER = {
-	asset_id: 33,
-	location_id: 6,
-	transfer_date: '2022-04-28'
+	asset_id: 99,
+	location_id: 15,
+	transfer_date: '2022-05-19'
 }
 
 async function getAssetTransfers(serialnumber) {
 	try {const transfersList =
 			 await 
 			 	db.select(
-					db.raw(`	
-						CASE 
-							WHEN location_type='cabinet' 
-								THEN CONCAT(
-									'CAB', 
-									TO_CHAR(all_locations.location_id, 'FM00'), 
-									': ', 
-									all_locations.located)
-								WHEN location_type='shelf' 
-									THEN CONCAT(
-										'SHE', 
-										TO_CHAR(all_locations.location_id, 'FM00'), 
-										': ', 
-										all_locations.located)	
-								WHEN location_type='staff' 
-									THEN CONCAT(
-										'STAFF', 
-										TO_CHAR(all_locations.location_id, 'FM00'), 
-										': ', 
-										all_locations.firstname,
-										' ',
-										all_locations.lastname)	
-							ELSE 'UNKOWN' 
-						END AS "location"`
-						),
+					db.raw(queryParsedLocations()),
 					'transfer_date', 
 					'capture_time'
 				)
@@ -52,64 +31,82 @@ async function getAssetTransfers(serialnumber) {
 	}
 }
 
-async function getLastTransferLocation(asset_id) {
-	try {	getLocationID = await 
-		db.select('location_id')
-			.from('asset_transfer')
-			.where('asset_id', asset_id)
-			.orderBy('transfer_date', 'desc')
-			.orderBy('capture_time', 'desc')
-			.limit(1);
+async function getAccTransfers(acc_id) {
+	try {const transfersList =
+			 await 
+			 	db.select(
+					db.raw(queryParsedLocations()),
+					'transfer_date', 
+					'capture_time'
+				)
+				.from('accessory')
+				.rightJoin('asset_transfer', 'accessory.asset_id', 'asset_transfer.asset_id')
+				.leftJoin('all_locations', 'all_locations.location_id', 'asset_transfer.location_id')
+				.where('accessory.accessory_id', acc_id)
+				.orderBy('transfer_date', 'desc')
+				.orderBy('capture_time', 'desc');
 
-		return getLocationID[0].location_id
+
+		return transfersList;
+	} catch(err) {
+		throw err;
+	}
+}
+
+
+async function getLastTransfer(asset_id) {
+	try {
+		const transferQuery = await
+			db.select(
+				'location_id',
+				'transfer_date'
+			)
+			.from('all_asset_locations')
+			.where('asset_id', asset_id);
+		return transferQuery[0]; 
 	} catch(err) {
 		throw err
 	}
-}
+} 
 
-async function getLastTransferDate(asset_id) {
-	const getDate = await db.select('transfer_date')
-				.from('asset_transfer')
-				.where('asset_id', asset_id)
-				.orderBy('transfer_date', 'desc')
-				.orderBy('capture_time', 'desc')
-				.limit(1);
-	return getDate[0]
-}
 
 async function addAssetTransfer( transfer_data ) {
-	// Get date of last transaction - returned as object
-	const lastTrDateObj = await getLastTransferDate(transfer_data.asset_id);
+	// Get date adn location of last transaction - returned as object
+	const lastTr = await getLastTransfer(transfer_data.asset_id);
 
 	// If nothing is returned, asset_id provided was invalid
-	if(!lastTrDateObj) {
-		throw 'Invalide Asset ID'
+	if(!lastTr) {
+		throw 'Invalide Asset ID';
 	}
 
 	// If last transaction was before transaction being added, throw error
-	const lastTrDate = new Date(lastTrDateObj.transfer_date);
+	const lastTrDate = new Date(lastTr.transfer_date);
 	const newTrDate = new Date(transfer_data.transfer_date);
 
 	if(newTrDate.getTime() <= lastTrDate.getTime()) {
-		throw('Error: Transfer date before last transaction')
+		throw('Error: Transfer date before last transaction');
+	} 
+
+	if(Number(lastTr.location_id) === Number(transfer_data.location_id)) {
+		throw('Error: Transfer to current loction');
 	}
 
 	try {
 		return await 
 				db('asset_transfer')
-					.insert(transfer_data, 'transfer_id')
+					.insert(transfer_data, 'transfer_id');
 	} catch(err) {
 		if(Number(err.code) === 23503) {
-			throw 'Asset ID does not exist'
+			throw 'Asset ID does not exist';
 		} else {
-			throw err
+			throw err;
 		}
 	}
 }
 
 async function test() {
 	try {
-		const dates = await getAssetTransfers('TQ5PTS92311')
+		const dates = await addAssetTransfer(TEST_TRANSFER);
 		console.log(dates)
 	} catch (err) {
 		console.log(err)
@@ -120,6 +117,6 @@ async function test() {
 
 module.exports = {
 	addAssetTransfer,
-	getLastTransferLocation,
+	getAccTransfers,
 	getAssetTransfers,
 }

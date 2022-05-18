@@ -1,5 +1,7 @@
 const db = require('../services/knex.js');
 
+const {queryParsedLocations} = require('../services/utils.js');
+
 const DEFAULT_LOCATION_ID = '1';
 
 const TEST_ASSET = {    
@@ -21,12 +23,30 @@ const TEST_EDIT = {
 
 }
 
-
 async function getAllAssets() {
 	return await db.select('*').from('all_assets');
 }
 
-// Get 1 asset with current location (last transfer entry) by serialnumber
+async function getAllTypeAssets(asset_type) {
+	try {
+		return await 
+			db(asset_type)
+			.distinctOn(`${asset_type}.serialnumber`)
+			.select(
+					'serialnumber',
+					db.raw(`CONCAT(make, ': ', model) AS model`),
+					db.raw(queryParsedLocations()),
+					'asset_condition'
+				)
+				.leftJoin('asset_transfer', 'asset_transfer.asset_id',`${asset_type}.asset_id`)
+				.leftJoin('all_locations', 'all_locations.location_id', 'asset_transfer.location_id')
+			.orderBy(`${asset_type}.serialnumber`)
+			.orderBy('asset_transfer.transfer_date', 'desc');
+		} catch (err) {
+			throw err
+		}
+}
+
 async function getOneAsset(serial_number) {
 	try {
 		const asset = await 
@@ -37,45 +57,17 @@ async function getOneAsset(serial_number) {
 					'all_assets.make',
 					'all_assets.model',
 					'all_assets.asset_condition',
-					db.raw(`	
-						CASE 
-							WHEN location_type='cabinet' 
-								THEN CONCAT(
-									'CAB', 
-									TO_CHAR(all_locations.location_id, 'FM000'), 
-									': ', 
-									all_locations.located)
-								WHEN location_type='shelf' 
-									THEN CONCAT(
-										'SHE', 
-										TO_CHAR(all_locations.location_id, 'FM000'), 
-										': ', 
-										all_locations.located)	
-								WHEN location_type='staff' 
-									THEN CONCAT(
-										'STAFF', 
-										TO_CHAR(all_locations.location_id, 'FM00'), 
-										': ', 
-										all_locations.firstname,
-										' ',
-										all_locations.lastname)	
-							ELSE 'UNKOWN' 
-						END AS "location"`
-						),
+					db.raw(queryParsedLocations()),
 				)
 				.from('all_assets')
-				.rightJoin('asset_transfer', 'all_assets.asset_id', 'asset_transfer.asset_id')
-				.leftJoin('all_locations', 'all_locations.location_id', 'asset_transfer.location_id')
+				.leftJoin('all_asset_locations', 'all_assets.asset_id', 'all_asset_locations.asset_id')
+				.leftJoin('all_locations', 'all_locations.location_id', 'all_asset_locations.location_id')
 				.where({'all_assets.serialnumber': serial_number})
-				.orderBy('transfer_date', 'desc')
-				.orderBy('capture_time', 'desc')
-				.limit(1);
 		return asset[0]
 	} catch (err) {
 		throw err
 	}
 }
-
 // Get lists for each field to be used in frontend suggestbox
 async function getAssetTypeSuggestList(asset_type) {
 	const serialList = 
@@ -176,7 +168,7 @@ async function editAsset(edit_data) {
 
 async function test() {
 	try {
-		const insert = await getOneAsset('D923DE213')
+		const insert = await getOneAsset('TESTPHONE')
 		console.log(insert)
 	} catch(err) {
 		console.log(err)
@@ -187,6 +179,7 @@ async function test() {
 
 module.exports = {
 	getAllAssets,
+	getAllTypeAssets,
 	getOneAsset,
 	getAssetSuggestLists,
 	addAsset,

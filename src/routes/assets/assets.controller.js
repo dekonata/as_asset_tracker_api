@@ -1,5 +1,6 @@
 const { 
 	getAllAssets,
+	getAllTypeAssets,
 	getOneAsset,
 	getAssetSuggestLists,
 	addAsset,
@@ -8,6 +9,15 @@ const {
 
 async function httpGetAllAssets(req, res) {
 	return res.status(200).json(await getAllAssets());
+}
+
+async function httpGetAllTypeAssets(req, res) {
+	const asset_type = req.params.asset_type;
+	try {
+		return res.status(200).json(await getAllTypeAssets(asset_type));
+	} catch(err) {
+		return res.status(400).json(err);
+	}
 }
 
 async function httpGetOneAsset(req, res) {
@@ -21,7 +31,6 @@ async function httpGetOneAsset(req, res) {
 }
 
 async function httpGetAssetLists(req, res) {
-	// console.log('check')
 	return res.status(200).json(await getAssetSuggestLists());
 }	
 
@@ -37,7 +46,6 @@ async function httpAddAsset(req, res) {
 
 async function httpEditAsset(req, res) {
 	const edit_data = req.body;
-	console.log('hit')
 	try {
 		const edit = await editAsset(edit_data)
 		return res.status(200).json(edit)
@@ -50,6 +58,7 @@ async function httpEditAsset(req, res) {
 
 module.exports = {
 	httpGetAllAssets,
+	httpGetAllTypeAssets,
 	httpGetOneAsset,
 	httpGetAssetLists,
 	httpAddAsset,

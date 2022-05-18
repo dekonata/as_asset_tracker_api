@@ -14,7 +14,7 @@ const TEST_STORAGE = {
 };
 
 
-async function getAllLocationsList(storage_type) {
+async function getAllLocationsList() {
 	const allLocations = await 
 		db.select(
 				'location_type_id',
@@ -27,11 +27,75 @@ async function getAllLocationsList(storage_type) {
 	return allLocations;
 }
 
+async function getOneLocation(location_id) {
+	try {
+		const locationQuery = await 
+			db.select(
+				'location_type_id',
+				'location_type',
+				'located',
+				'description'
+				)
+				.from('all_locations')
+				.where('location_id', location_id)
+
+		return locationQuery[0]
+	} catch(err) {
+		throw(err)
+	}
+}
+
+async function getLocationAssets(location_id) {
+	try {
+		const locAssetQuery = await
+			db.select(
+				'all_asset_locations.asset_id',
+				'all_asset_locations.transfer_date',
+				'all_assets.asset_type',
+				'all_assets.serialnumber',
+				db.raw(`CONCAT(make, ': ', model) AS model`),
+				'all_assets.asset_condition'
+			) 
+			.from('all_assets')
+			.leftJoin('all_asset_locations', 'all_assets.asset_id', 'all_asset_locations.asset_id')
+			.where('location_id', location_id)
+
+		return locAssetQuery;
+	} catch (err) {
+		throw err
+	}
+}
+
+async function getLocationAccessories(location_id) {
+	try {
+		const locAccQuery = await
+			db.select(
+				'all_asset_locations.location_id',
+				'accessory.asset_id',
+				'all_asset_locations.transfer_date',
+				'accessory.accessory_id',
+				db.raw(`CONCAT('ACC', TO_CHAR(accessory.accessory_id, 'FM000')) as parsedid`),
+				'accessory.accessory_type',
+				'accessory.make',
+				'accessory.description'
+			) 
+			.from('accessory')
+			.leftJoin('all_asset_locations', 'accessory.asset_id', 'all_asset_locations.asset_id')
+			.where('location_id', location_id)
+
+
+		return locAccQuery
+	} catch (err) {
+		throw err
+	}
+}
+
+
 
 
 // Delete when complete
 async function test() {
-	const newStorage = await getAllLocationsList();
+	const newStorage = await getLocationAssets(15);
 	console.log(newStorage)
 }
 
@@ -40,4 +104,7 @@ async function test() {
 
 module.exports = {
 	getAllLocationsList,
+	getOneLocation,
+	getLocationAssets,
+	getLocationAccessories,
 }
