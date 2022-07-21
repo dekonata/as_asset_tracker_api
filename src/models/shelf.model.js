@@ -25,6 +25,19 @@ async function getShelfSuggestLists() {
 	return {usedIds, unusedIds ,locatedList};
 }
 
+async function getOneShelfId(location_type_id) {
+	try {
+		const getLocationIdQuery = 
+			await db.select('location_id')
+				.from('shelf')
+				.where('shelf_id', location_type_id);
+
+		return getLocationIdQuery[0].location_id;
+	} catch(err) {
+		throw(err);
+	}
+}
+
 async function addShelf(storage_data) {
 	try {
 		return await db.transaction(async trx => {
@@ -59,5 +72,6 @@ async function test() {
 
 module.exports = {
 	getShelfSuggestLists,
+	getOneShelfId,
 	addShelf,
 }

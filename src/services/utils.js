@@ -11,19 +11,19 @@ const queryParsedLocations = () => {
 				WHEN location_type='cabinet' 
 					THEN CONCAT(
 						'CAB', 
-						TO_CHAR(all_locations.location_id, 'FM00'), 
+						TO_CHAR(all_locations.location_type_id, 'FM00'), 
 						': ', 
 						all_locations.located)
 					WHEN location_type='shelf' 
 						THEN CONCAT(
 							'SHE', 
-							TO_CHAR(all_locations.location_id, 'FM00'), 
+							TO_CHAR(all_locations.location_type_id, 'FM00'), 
 							': ', 
 							all_locations.located)	
 					WHEN location_type='staff' 
 						THEN CONCAT(
 							'STAFF', 
-							TO_CHAR(all_locations.location_id, 'FM00'), 
+							TO_CHAR(all_locations.location_type_id, 'FM00'), 
 							': ', 
 							all_locations.firstname,
 							' ',
@@ -32,7 +32,18 @@ const queryParsedLocations = () => {
 			END AS "location"`
 }
 
+function isAuth(req, res, next) {
+	const userStaffId = req.session?.passport?.user
+	if(!userStaffId) {
+		return res.redirect(401,'/')
+
+
+	}
+	next()
+}
+
 module.exports = {
 	getUnusedIds,
-	queryParsedLocations
+	queryParsedLocations,
+	isAuth,
 }

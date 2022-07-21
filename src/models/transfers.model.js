@@ -13,6 +13,7 @@ async function getAssetTransfers(serialnumber) {
 	try {const transfersList =
 			 await 
 			 	db.select(
+			 		'location_type',
 					db.raw(queryParsedLocations()),
 					'transfer_date', 
 					'capture_time'

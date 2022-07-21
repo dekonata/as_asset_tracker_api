@@ -1,0 +1,7 @@
+{"location_id":5,"transfer_id":172,"location_type_id":5,"location_detail":"AS Offices, Unit 5","asset_type":"cellphone","serialnumber":"G834SDGW22","asset_detail":"Samsung: P11","asset_condition":"New"}
+{"location_id":12,"transfer_id":184,"location_type_id":2,"location_detail":"AS Offices, Unit 5","asset_type":"laptop","serialnumber":"BING","asset_detail":"DELL: Macbook Pro","asset_condition":"New"}
+{"location_id":15,"transfer_id":164,"location_type_id":3,"location_detail":"Nic Lanham","asset_type":"monitor","serialnumber":"C02GF41QDJGR","asset_detail":"Apple: 21","asset_condition":"Faulty"}
+{"location_id":17,"transfer_id":188,"location_type_id":4,"location_detail":"Luchal MacDougal","asset_type":"monitor","serialnumber":"C02QQ4M6F2GC","asset_detail":"Asus: 21","asset_condition":"New"}
+{"location_id":1,"transfer_id":167,"location_type_id":1,"location_detail":"AS Offices, Unit 4","asset_type":"tablet","serialnumber":"DLXCV1DGGJ262","asset_detail":"Apple: Ipad","asset_condition":"Used"}
+{"location_id":15,"transfer_id":169,"location_type_id":3,"location_detail":"Nic Lanham","asset_type":"cellphone","serialnumber":"TESTPHONE","asset_detail":"Apple: P11","asset_condition":"New"}
+{"location_id":1,"transfer_id":186,"location_type_id":1,"location_detail":"AS Offices, Unit 4","asset_type":"laptop","serialnumber":"X734SDF03","asset_detail":"DELL: P2000","asset_condition":"New"}

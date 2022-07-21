@@ -15,8 +15,11 @@ async function httpGetStaffLists(req, res) {
 }
 
 async function httpAddStaff(req, res) {
-	const staff_data = req.body;
+
 	try {
+		const staff_data = req.body;
+		staff_data['email'] = staff_data['email'].toLowerCase();
+
 		const addedStaff = await addStaff(staff_data);
 		return res.status(201).json(addedStaff);
 	} catch (err) {

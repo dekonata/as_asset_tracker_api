@@ -1,8 +1,8 @@
 // To Do: Create single access point for all Storage Types (cabinets, shelves, etc)
-
 const db = require('../services/knex.js');
 
 const { getUnusedIds } = require('../services/utils.js');
+const {queryParsedLocations} = require('../services/utils.js');
 
 const LOCATION_TYPE = 'cabinet';
 const ID_RANGE = 100;
@@ -17,6 +17,7 @@ const TEST_STORAGE = {
 async function getAllLocationsList() {
 	const allLocations = await 
 		db.select(
+				db.raw(queryParsedLocations()),				
 				'location_type_id',
 				'location_type',
 				'location_id',
@@ -25,6 +26,20 @@ async function getAllLocationsList() {
 			.from('all_locations');
 
 	return allLocations;
+}
+
+async function getLocationSuggestlists() {
+	const locationsQuery = await
+		db.select(
+			'location_id',
+			db.raw(queryParsedLocations()),	
+		)
+		.from('all_locations')
+		.whereNot('location_type', 'staff')
+
+	const allLocations = locationsQuery.map(location => [location.location, location.location_id]);
+
+	return allLocations
 }
 
 async function getOneLocation(location_id) {
@@ -38,6 +53,8 @@ async function getOneLocation(location_id) {
 				)
 				.from('all_locations')
 				.where('location_id', location_id)
+
+
 
 		return locationQuery[0]
 	} catch(err) {
@@ -74,7 +91,7 @@ async function getLocationAccessories(location_id) {
 				'accessory.asset_id',
 				'all_asset_locations.transfer_date',
 				'accessory.accessory_id',
-				db.raw(`CONCAT('ACC', TO_CHAR(accessory.accessory_id, 'FM000')) as parsedid`),
+				db.raw(`CONCAT('ACC', TO_CHAR(accessory.accessory_id, 'FM00')) as parsedid`),
 				'accessory.accessory_type',
 				'accessory.make',
 				'accessory.description'
@@ -95,7 +112,7 @@ async function getLocationAccessories(location_id) {
 
 // Delete when complete
 async function test() {
-	const newStorage = await getLocationAssets(15);
+	const newStorage = await getLocationSuggestlists();
 	console.log(newStorage)
 }
 
@@ -104,6 +121,7 @@ async function test() {
 
 module.exports = {
 	getAllLocationsList,
+	getLocationSuggestlists,
 	getOneLocation,
 	getLocationAssets,
 	getLocationAccessories,

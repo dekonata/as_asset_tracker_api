@@ -26,6 +26,19 @@ async function getCabinetSuggestLists() {
 	return {usedIds, unusedIds ,locatedList};
 }
 
+async function getOneCabinetId(location_type_id) {
+	try {
+		const getCabinetIdQuery = 
+			await db.select('location_id')
+				.from('cabinet')
+				.where('cabinet_id', location_type_id);
+
+		return getCabinetIdQuery[0].location_id;
+	} catch(err) {
+		throw(err);
+	}
+}
+
 
 async function addCabinet(storage_data) {
 	try {
@@ -50,9 +63,11 @@ async function addCabinet(storage_data) {
 	}
 }
 
+
+
 // Delete when complete
 async function test() {
-	const newStorage = await addCabinet(TEST_STORAGE);
+	const newStorage = await getOneCabinetId(7);
 	console.log(newStorage)
 }
 
@@ -60,5 +75,6 @@ async function test() {
 
 module.exports = {
 	getCabinetSuggestLists,
+	getOneCabinetId,
 	addCabinet,
 }

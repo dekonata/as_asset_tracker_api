@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt')
+
 const db = require('../services/knex.js');
 
 const { getUnusedIds } = require('../services/utils.js');
@@ -6,8 +8,11 @@ const LOCATION_TYPE = 'Staff'
 const ID_RANGE = 30
 
 const TEST_STAFF = {
-	firstname: "Cabby",
+	staff_id: 10,
+	firstname: "",
 	lastname: "Packs",
+	email: 'test@gmail.com',
+	password: "password"
 };
 
 const TEST_EDIT_STAFF = {
@@ -28,6 +33,8 @@ async function getOneStaff(staff_id) {
 				'location_id',
 				'firstname',
 				'lastname',
+				'email',
+				'access'
 				)
 				.from('staff')
 				.where('staff_id', staff_id);
@@ -35,6 +42,25 @@ async function getOneStaff(staff_id) {
 		return oneStaffQuery[0];
 	} catch(err) {
 		throw err;
+	}
+}
+
+
+// Get staff user password and access level when logging inr
+async function getUser(email) {
+	try {	
+		const user = await db.select(
+			'staff_id',
+			'hash',
+			'access'
+			)
+			.from('staff')
+			.where('email', email)
+
+
+			return user[0]
+	} catch(err) {
+		throw(err);
 	}
 }
 
@@ -59,16 +85,19 @@ async function getStaffSuggestLists() {
 
 
 async function addStaff(staff_data) {
+	const {password, ...data} = staff_data;
+	console.log(staff_data)
+	const saltRounds = 10;
 	try {
 		return await db.transaction(async trx => {
+			// Create transfer location id 
 			const transfer_location = 
 				await trx('transfer_location')
 					.insert({
 						location_type: LOCATION_TYPE
 					}, 'location_id');
-
-			const insert_data = Object.assign({}, staff_data, transfer_location[0]);
-
+			const hash =  await bcrypt.hash(password, saltRounds);
+			const insert_data = Object.assign({}, data, transfer_location[0],  {hash:hash, access: 'user'});
 			const staff = 
 				await trx('staff')
 					.insert(insert_data, 'staff_id');
@@ -93,8 +122,8 @@ async function editStaff(edit_data) {
 
 
 async function test() {
-	const newStaff = await getOneStaff(5);
-	console.log(newStaff)
+	const postAddStaff = await addStaff(TEST_STAFF);
+	console.log(postAddStaff)
 }
 
 // test();
@@ -104,4 +133,5 @@ module.exports = {
 	getStaffSuggestLists,
 	addStaff,
 	editStaff,
+	getUser,
 }

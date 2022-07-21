@@ -1,5 +1,6 @@
 const express = require('express');
 
+const authRouter = require('./auth/auth.router');
 const assetsRouter = require('./assets/assets.router');
 const accessoriesRouter = require('./accessories/accessories.router');
 const cabinetsRouter = require('./cabinets/cabinets.router');
@@ -12,6 +13,7 @@ const reportsRouter = require('./reports/reports.router');
 
 const api = express.Router();
 
+api.use('/auth/', authRouter);
 api.use('/assets/', assetsRouter);
 api.use('/accessories', accessoriesRouter);
 api.use('/cabinets/', cabinetsRouter);
