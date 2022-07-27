@@ -28,6 +28,23 @@ async function getAllLocationsList() {
 	return allLocations;
 }
 
+async function getLocationIDByTypeID(location_type, location_type_id) {
+	try {
+		const locationIDQuery = await
+			db.pluck('location_id')
+				.from('all_locations')
+				.where({
+					location_type,
+					location_type_id
+				});
+
+	return locationIDQuery[0];
+	} catch(err) {
+		throw(err);
+	}
+
+}
+
 async function getLocationSuggestlists() {
 	const locationsQuery = await
 		db.select(
@@ -112,15 +129,16 @@ async function getLocationAccessories(location_id) {
 
 // Delete when complete
 async function test() {
-	const newStorage = await getLocationSuggestlists();
+	const newStorage = await getLocationIDByTypeID('staff', 01);
 	console.log(newStorage)
 }
 
-// test();
+test();
 
 
 module.exports = {
 	getAllLocationsList,
+	getLocationIDByTypeID,
 	getLocationSuggestlists,
 	getOneLocation,
 	getLocationAssets,

@@ -1,56 +1,14 @@
-const state = {}
-
-/**
- * @api public
- * */
-
-
-function testHookFunc(val) {
-	var hook = {
-	  memoizedState: 0, // our initial state
-	  baseState: 0, // our initial state
-	  queue: {
-	    last: null,
-	    lastRenderedState: 0, // our initial state
-	  },
-	  baseUpdate: null,
-	  next: null,
-	}
-
-	hook.memoizedState = val
-	const dispatch = (newState) => {
-		hook.memoizedState = newState
-		console.log(hook)
-	}
-
-	return [hook.memoizedState, dispatch]
+// function get retrieve available ids within a range from 0 given a list of used ids
+const getUnusedIds = (range, usedIds) => {
+	const allIdsRange= Array.from(Array(range).keys());
+	const availableIds = allIdsRange.filter(id => !usedIds.includes(id) && id !== 0);
+	const padded = availableIds.map(id => id.toString());
+	return availableIds;
 }
 
-const [count, setCount] = testHookFunc(5)
+console.log(getUnusedIds(100, [1]))
 
-console.log(count)
+const id = 'STAFF01'
 
-setCount(10)
-
-console.log(count)
-
-class ListNode {
-    constructor(data) {
-        this.data = data
-        this.next = null                
-    }
-}
-
-class LinkedList {
-    constructor(head = null) {
-        this.head = head
-    }
-}
-
-let node1 = new ListNode(2)
-let node2 = new ListNode(5)
-node1.next = node2
-
-let list = new LinkedList(node1)
-
-console.log(list) //returns 5
+console.log(id.match(/[0-9]+/))
+console.log(id.match(/[a-zA-Z]+/))

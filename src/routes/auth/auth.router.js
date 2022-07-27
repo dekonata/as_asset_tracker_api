@@ -7,7 +7,7 @@ const authRouter = express.Router();
 
 authRouter.post('/local', 
 	passport.authenticate('local'),
-	httpAuth
+	httpAuth,
 ); 
 
 module.exports = authRouter;

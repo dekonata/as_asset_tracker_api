@@ -1,5 +1,6 @@
 const {
 	getAllLocationsList,
+	getLocationIDByTypeID,
 	getLocationSuggestlists,
 	getOneLocation,
 	getLocationAssets,
@@ -8,6 +9,7 @@ const {
 
 const { getOneCabinetId } = require('../../models/cabinets.model.js');
 const { getOneShelfId } = require('../../models/shelf.model.js');
+const { getOneStaff } = require('../../models/staff.model.js')
 
 async function httpGetAllLocationsList(req, res) {
 	return res.status(200).json(await getAllLocationsList());
@@ -19,25 +21,33 @@ async function httpGetLocationSuggestlists(req, res) {
 
 async function httpGetOneLocation(req, res) {
 	try {
-		// Id in frontend location type id formatted as CAB01 or SHE01 
-		const parsed_id = req.params.locationsid;
-		const location_type = parsed_id.substr(0,3);
-		const location_type_id = Number(parsed_id.substr(4,5));
+		// Id in frontend location type id formatted as CAB01 or SHE01 or STAFF01
 
-		let location_id
+		const parsed_id = req.params.locationsid;
+		// Extract the first part identifying the location taype CAB, SHE or STAFF
+		const location_type = parsed_id.match(/[a-zA-Z]+/)[0];
+		// Extract the location id number
+		const location_type_id = Number(parsed_id.match(/[0-9]+/)[0]);
+
+		let location_id;
 
 		switch(location_type) {
 			case 'CAB':
-				location_id = await getOneCabinetId(location_type_id);
+				location_id = await getLocationIDByTypeID('cabinet', location_type_id);
 				break
 			case 'SHE':
-				location_id = await getOneCabinetId(location_type_id);
+				location_id = await getLocationIDByTypeID('shelf', location_type_id);
+				break
+			case 'STAFF':
+				location_id = await getLocationIDByTypeID('staff', location_type_id);
 				break
 			default:
-				return res.status(400).json('Invalide Location id');
+				return res.status(400).json('Invalid Location id');
 		}
 
-		console.log(location_id)
+		if(!location_id) {
+			return res.status(400).json("Location not found");
+		}
 
 		const location = await getOneLocation(location_id);
 		const assets = await getLocationAssets(location_id);

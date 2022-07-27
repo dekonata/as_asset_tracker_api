@@ -1,7 +1,7 @@
 // function get retrieve available ids within a range from 0 given a list of used ids
 const getUnusedIds = (range, usedIds) => {
 	const allIdsRange= Array.from(Array(range).keys());
-	const availableIds = allIdsRange.filter(id => !usedIds.includes(id));
+	const availableIds = allIdsRange.filter(id => !usedIds.includes(id) && id !== 0);
 	const padded = availableIds.map(id => id.toString());
 	return availableIds;
 }
@@ -35,7 +35,7 @@ const queryParsedLocations = () => {
 function isAuth(req, res, next) {
 	const userStaffId = req.session?.passport?.user
 	if(!userStaffId) {
-		return res.redirect(401,'/')
+		return res.status(401).json('error: no session')
 
 
 	}
