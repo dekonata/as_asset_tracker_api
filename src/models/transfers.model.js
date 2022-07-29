@@ -4,9 +4,9 @@ const {queryParsedLocations} = require('../services/utils.js');
 
 
 const TEST_TRANSFER = {
-	asset_id: 99,
-	location_id: 15,
-	transfer_date: '2022-05-19'
+	asset_ids: [96, 105, 103],
+	location_id: 49,
+	transfer_date: '2022-07-21'
 }
 
 async function getAssetTransfers(serialnumber) {
@@ -72,36 +72,42 @@ async function getLastTransfer(asset_id) {
 
 
 async function addAssetTransfer( transfer_data ) {
-	// Get date adn location of last transaction - returned as object
-	const lastTr = await getLastTransfer(transfer_data.asset_id);
-
-	// If nothing is returned, asset_id provided was invalid
-	if(!lastTr) {
-		throw 'Invalide Asset ID';
-	}
-
-	// If last transaction was before transaction being added, throw error
-	const lastTrDate = new Date(lastTr.transfer_date);
-	const newTrDate = new Date(transfer_data.transfer_date);
-
-	if(newTrDate.getTime() <= lastTrDate.getTime()) {
-		throw('Error: Transfer date before last transaction');
-	} 
-
-	if(Number(lastTr.location_id) === Number(transfer_data.location_id)) {
-		throw('Error: Transfer to current loction');
-	}
-
 	try {
-		return await 
-				db('asset_transfer')
-					.insert(transfer_data, 'transfer_id');
-	} catch(err) {
-		if(Number(err.code) === 23503) {
-			throw 'Asset ID does not exist';
-		} else {
-			throw err;
-		}
+		await db.transaction(async trx => {
+			const assetIds = transfer_data.asset_ids
+			const {location_id, transfer_date} = transfer_data
+
+			for(assetId of assetIds) {
+				// Get date adn location of last transaction - returned as object
+				const lastTr = await getLastTransfer(assetId);
+
+				// If nothing is returned, asset_id provided was invalid
+				if(!lastTr) {
+					throw 'Invalide Asset ID';
+				}
+
+				// If last transaction was before transaction being added, throw error
+				const lastTrDate = new Date(lastTr.transfer_date);
+				const newTrDate = new Date(transfer_data.transfer_date);
+
+				if(newTrDate.getTime() <= lastTrDate.getTime()) {
+					throw('Error: Transfer date before last transaction');
+				} 
+
+				if(Number(lastTr.location_id) === Number(transfer_data.location_id)) {
+					throw('Error: Transfer to current loction');
+				}
+
+				const insert = await trx('asset_transfer').insert({
+					asset_id: assetId,
+					location_id: location_id,
+					transfer_date: transfer_date
+					}, 'transfer_id');
+				}
+			return "transfer success"
+		})
+	} catch (error) {
+		throw(error)
 	}
 }
 
