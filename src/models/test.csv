@@ -1,0 +1,28 @@
+asset_type,location_id,transfer_id,location_type_id,location_detail,asset_type
+cellphone,5,172,5,"AS Offices, Unit 5",cellphone
+laptop,99,249,99,,laptop
+monitor,15,164,,,monitor
+monitor,20,192,,,monitor
+Trackpad,15,185,,,Trackpad
+tablet,36,216,7,Cabby Packs,tablet
+cellphone,15,169,,,cellphone
+laptop,1,186,1,"AS Offices, Unit 4",laptop
+Laptop Bag,1,214,1,"AS Offices, Unit 4",Laptop Bag
+laptop,1,193,1,"AS Offices, Unit 4",laptop
+Power Supply,99,250,99,,Power Supply
+Power Supply,1,199,1,"AS Offices, Unit 4",Power Supply
+Mouse,1,200,1,"AS Offices, Unit 4",Mouse
+Power Supply,99,252,99,,Power Supply
+laptop,10,253,7,"AS Offices, Unit 5",laptop
+Mouse,1,220,1,"AS Offices, Unit 4",Mouse
+laptop,1,221,1,"AS Offices, Unit 4",laptop
+Power Supply,1,222,1,"AS Offices, Unit 4",Power Supply
+laptop,1,223,1,"AS Offices, Unit 4",laptop
+laptop,99,251,99,,laptop
+Power Supply,1,225,1,"AS Offices, Unit 4",Power Supply
+tablet,45,228,3,Kid Buf,tablet
+Power Supply,45,229,3,Kid Buf,Power Supply
+cellphone,1,246,1,"AS Offices, Unit 4",cellphone
+Power Supply,1,247,1,"AS Offices, Unit 4",Power Supply
+laptop,37,256,1,Kriegler van der Merwe,laptop
+Power Supply,1,255,1,"AS Offices, Unit 4",Power Supply

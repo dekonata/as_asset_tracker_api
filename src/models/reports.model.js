@@ -48,6 +48,17 @@ async function getAssetLocationsReportStream() {
 
 }
 
+// async function getUserAssetsREaport() {
+// 	try {
+// 		const stream = await
+// 			db.select(
+
+
+
+// 				)
+// 	}
+// }
+
 async function test() {
 	return await pipeline(
 		await getAssetLocationsReportStream(),
@@ -59,7 +70,7 @@ async function test() {
 
 
 
-// test().catch(console.error)
+test()
 
 module.exports = {
 	getAssetLocationsReportStream,

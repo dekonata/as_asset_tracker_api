@@ -7,6 +7,14 @@ const {queryParsedLocations} = require('../services/utils.js');
 const LOCATION_TYPE = 'cabinet';
 const ID_RANGE = 100;
 
+const DISPOSAL = {
+	location: "DISPOSAL", 
+	location_type_id: 1, 
+	location_type: "disposal", 
+	location_id: 99, 
+	location_detail: "DISPOSAL"
+}
+
 const TEST_STORAGE = {
 	location_type: 'cabinet2',
 	description: 'Unit 5 Against wall',
@@ -129,11 +137,11 @@ async function getLocationAccessories(location_id) {
 
 // Delete when complete
 async function test() {
-	const newStorage = await getLocationIDByTypeID('staff', 01);
+	const newStorage = await getAllLocationsList('staff', 01);
 	console.log(newStorage)
 }
 
-test();
+// test();
 
 
 module.exports = {

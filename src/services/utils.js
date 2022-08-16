@@ -27,7 +27,9 @@ const queryParsedLocations = () => {
 							': ', 
 							all_locations.firstname,
 							' ',
-							all_locations.lastname)	
+							all_locations.lastname)
+					WHEN location_type='disposal'
+						THEN 'DISPOSAL'
 				ELSE 'UNKOWN' 
 			END AS "location"`
 }

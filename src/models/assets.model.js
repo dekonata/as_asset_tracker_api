@@ -14,6 +14,30 @@ const TEST_ASSET = {
   transfer_date: '2022-02-25'                                                                                                                                   
 }   
 
+const TEST_ASSET_LIST = [
+	{
+		asset_type: 'laptop',                                                                                                                                                   
+  		asset: {
+			make: 'Lenovo', 
+			model: 'E50',
+			asset_condition: 'new',
+			serialnumber: 'F80DF'
+		},                                                                                                                        
+  		transfer_date: '2022-07-25' 
+	},
+	{
+		asset_type: 'accessory',                                                                                                                                                   
+  		asset: {
+			make: 'Lenovo', 
+			accessory_type: 'Power Supply',
+			description: 'Lenovo E50 PSU',
+		},                                                                                                                        
+  		transfer_date: '2022-02-25' 
+	},
+
+] ;
+
+
 const TEST_EDIT = {
 	asset_type: 'laptop',
 	serialnumber: 'T9001',
@@ -23,8 +47,19 @@ const TEST_EDIT = {
 
 }
 
+const TEST_NOTE = {
+	asset_id: 127,
+	note: "Damaged by Brad while he was travelling because he was drunk"
+}
+
 async function getAllAssets() {
 	return await db.select('*').from('all_assets');
+}
+
+const TEST_EDIT_NOTE = {
+	note_id: 3,
+	note: "Damaged by Brad while he was travelling because he was drunk-ish"
+
 }
 
 async function getAllTypeAssets(asset_type) {
@@ -154,21 +189,97 @@ async function addAsset(asset_data) {
 	}
 }
 
+async function addMultipleAssets(asset_list) {
+	try {
+		return await db.transaction(async trx => {
+			for(asset_data of asset_list) {
+				const {asset_type, asset, transfer_date} = asset_data;
+				// Generate trasnfer_id for asset	
+				const addTransferAsset = 
+				await trx('transfer_id')
+					.insert({asset_type: asset_type}, 'asset_id');
+
+				// Add new Asset Transfer ID to asset data for inserting in asset table
+				const insertData = Object.assign({}, asset, addTransferAsset[0]); 
+
+				const insertAsset =
+					await trx(asset_type)
+						.insert( insertData, 'asset_id');
+
+				// Transfer new item to default location in transfer table				
+				const addToTransferLog =
+					await trx('asset_transfer')
+						.insert({
+							asset_id: addTransferAsset[0].asset_id,
+							location_id: DEFAULT_LOCATION_ID,
+							transfer_date: transfer_date,
+						}, 'transfer_id');
+			}
+
+			return "Insert Complete";
+		})
+	} catch(err) {
+		throw err;
+	}
+}
 
 
 async function editAsset(edit_data) {
 	try {
 		return await db(edit_data.asset_type)
 			.where('serialnumber', edit_data.serialnumber)
-			.update(edit_data.payload, ['asset_id'])
+			.update(edit_data.payload, ['asset_id']);
 	} catch(err) {
-		throw err
+		throw err;
+	}
+}
+
+async function addAssetNote(note_data) {
+	const {asset_id, note} = note_data;
+	try {
+		return await db('asset_note')
+			.insert({
+				asset_id,
+				note
+			}, ['note_id']);
+	} catch(err) {
+		throw err;
+	}
+}
+
+async function editAssetNote(edit_data) {
+	const {note_id, note} = edit_data;
+	try {
+		return await db('asset_note')
+			.where('note_id', note_id)
+			.update('note', note, ['note_id']);
+	} catch(err) {
+		throw err;
+	}
+}
+
+async function getAssetNotes(asset_id) {
+	try {
+		return await db('asset_note')
+			.where('asset_id', asset_id);
+	} catch(err) {
+		throw(err);
+	}
+}
+
+async function delAssetNote(note_id) {
+	try {
+		return await db('asset_note')
+			.where('note_id', note_id)
+			.del();
+	} catch(err) {
+		throw(err);
 	}
 }
 
 async function test() {
 	try {
-		const insert = await getOneAsset('TESTPHONE')
+		const insert = await editAssetNote(TEST_EDIT_NOTE);
 		console.log(insert)
 	} catch(err) {
 		console.log(err)
@@ -183,5 +294,10 @@ module.exports = {
 	getOneAsset,
 	getAssetSuggestLists,
 	addAsset,
-	editAsset
+	addMultipleAssets,
+	editAsset,
+	addAssetNote,
+	editAssetNote,
+	getAssetNotes,
+	delAssetNote,
 }

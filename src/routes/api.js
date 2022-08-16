@@ -13,7 +13,6 @@ const reportsRouter = require('./reports/reports.router');
 
 const api = express.Router();
 
-api.use('/auth/', authRouter);
 api.use('/assets/', assetsRouter);
 api.use('/accessories', accessoriesRouter);
 api.use('/cabinets/', cabinetsRouter);

@@ -15,12 +15,13 @@ async function httpGetLocationAssetsReport(req, res) {
 		const options = {
 		delimiter: ',',
 		columns: [
-			{key: 'asset_type'}, 
 			{key: 'location_id'}, 
 			{key: 'transfer_id'}, 
 			{key: 'location_type_id'}, 
 			{key: 'location_detail'}, 
-			{key: 'asset_type'}
+			{key: 'asset_type'},
+			{key: 'serialnumber'},
+			{key: 'asset_condition'},
 		],
 		header: true
 		}
